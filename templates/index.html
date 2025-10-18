@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Banner Generator</title>
+  <style>
+    body {
+      font-family: 'Syne', sans-serif;
+      background-color: #ffffff;
+      color: #000000;
+      margin: 0;
+      padding: 40px 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    h1 {
+      font-size: 40px;
+      margin-bottom: 30px;
+      text-align: center;
+    }
+
+    .templates {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 30px;
+      width: 100%;
+      max-width: 1200px;
+      flex-grow: 1;
+    }
+
+    .template-card {
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      padding: 16px;
+      width: 320px;
+      text-align: center;
+      background-color: #f9f9f9;
+      box-sizing: border-box;
+      transition: all 0.2s ease;
+    }
+
+    .template-card:hover {
+      transform: scale(1.02);
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .template-card img {
+      width: 100%;
+      border-radius: 6px;
+      border: 1px solid #ddd;
+    }
+
+    .inputs {
+      margin-top: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    input[type="text"] {
+      padding: 10px;
+      border-radius: 6px;
+      border: 1px solid #b5b5b5;
+      background-color: #f0f0f0;
+      font-size: 14px;
+      color: #000;
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    button {
+      background-color: #2E5CFF;
+      color: white;
+      border: none;
+      padding: 10px 14px;
+      border-radius: 6px;
+      font-size: 14px;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+
+    button:hover {
+      background-color: #5578ff;
+    }
+
+    /* ---- Download button custom style ---- */
+    .download-btn {
+      margin-top: 10px;
+      width: 100%;
+      background-color: #f0f0f0;
+      border: 1px solid #b5b5b5;
+      color: #000000;
+      transition: all 0.2s ease;
+    }
+
+    .download-btn:hover {
+      background-color: #2E5CFF;
+      color: #ffffff;
+      border: 1px solid #2E5CFF; /* ✅ обводка теперь остается, просто становится синей */
+    }
+    /* -------------------------------------- */
+
+    .preview {
+      margin-top: 12px;
+      width: 100%;
+      border-radius: 6px;
+      border: 1px solid #ddd;
+      background-color: white;
+      display: none;
+    }
+
+    footer {
+      margin-top: 40px;
+      font-size: 14px;
+      text-align: center;
+      color: #555;
+    }
+
+    footer a {
+      color: #2E5CFF;
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    footer a:hover {
+      text-decoration: underline;
+    }
+
+    @media (max-width: 1000px) {
+      .template-card {
+        width: 90%;
+        max-width: 400px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <h1>Polymarket Banner Generator</h1>
+
+  <div class="templates">
+    <!-- Template 1 -->
+    <div class="template-card" data-template="1">
+      <img src="/static/poly1.png" alt="Template 1" />
+      <div class="inputs">
+        <input type="text" placeholder="Enter nickname" class="nickname" />
+        <input type="text" placeholder="Enter Twitter ID" class="twitter" />
+        <button class="generate-btn">Generate</button>
+        <img class="preview" />
+        <button class="download-btn" style="display:none;">Download</button>
+      </div>
+    </div>
+
+    <!-- Template 2 -->
+    <div class="template-card" data-template="2">
+      <img src="/static/poly2.png" alt="Template 2" />
+      <div class="inputs">
+        <input type="text" placeholder="Enter nickname" class="nickname" />
+        <input type="text" placeholder="Enter Twitter ID" class="twitter" />
+        <button class="generate-btn">Generate</button>
+        <img class="preview" />
+        <button class="download-btn" style="display:none;">Download</button>
+      </div>
+    </div>
+
+    <!-- Template 3 -->
+    <div class="template-card" data-template="3">
+      <img src="/static/poly3.png" alt="Template 3" />
+      <div class="inputs">
+        <input type="text" placeholder="Enter nickname" class="nickname" />
+        <input type="text" placeholder="Enter Twitter ID" class="twitter" />
+        <button class="generate-btn">Generate</button>
+        <img class="preview" />
+        <button class="download-btn" style="display:none;">Download</button>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    Developed by <a href="https://x.com/BuzzMalx" target="_blank">Buzzmalx</a> for Polymarket community
+  </footer>
+
+  <script>
+    document.querySelectorAll('.generate-btn').forEach(button => {
+      button.addEventListener('click', async () => {
+        const card = button.closest('.template-card');
+        const nickname = card.querySelector('.nickname').value.trim();
+        const twitter = card.querySelector('.twitter').value.trim();
+        const template = card.dataset.template;
+
+        if (!nickname || !twitter) {
+          alert('Please enter both nickname and Twitter ID.');
+          return;
+        }
+
+        button.disabled = true;
+        button.textContent = "Generating...";
+
+        const res = await fetch("/generate", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ nickname, twitter, template })
+        });
+
+        const data = await res.json();
+        button.disabled = false;
+        button.textContent = "Generate";
+
+        if (data.image) {
+          const preview = card.querySelector('.preview');
+          const downloadBtn = card.querySelector('.download-btn');
+          preview.src = data.image;
+          preview.style.display = "block";
+          downloadBtn.style.display = "block";
+
+          downloadBtn.onclick = () => {
+            const link = document.createElement('a');
+            link.href = data.image;
+            link.download = `${nickname}_banner.png`;
+            link.click();
+          };
+        } else {
+          alert("Error generating image.");
+        }
+      });
+    });
+  </script>
+</body>
+</html>
